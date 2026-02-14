@@ -1,5 +1,19 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
+// CSRF token cache
+let csrfToken = null;
+
+async function getCsrfToken() {
+  if (!csrfToken) {
+    const response = await fetch(`${API_BASE_URL}/csrf-token`, {
+      credentials: 'include',
+    });
+    const data = await response.json();
+    csrfToken = data.token;
+  }
+  return csrfToken;
+}
+
 export const api = {
   // Auth endpoints
   async getUser() {
@@ -37,10 +51,12 @@ export const api = {
   },
 
   async addMFA(data) {
+    const token = await getCsrfToken();
     const response = await fetch(`${API_BASE_URL}/api/mfa`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'x-csrf-token': token,
       },
       credentials: 'include',
       body: JSON.stringify(data),
@@ -53,10 +69,12 @@ export const api = {
   },
 
   async addMFAFromQR(data) {
+    const token = await getCsrfToken();
     const response = await fetch(`${API_BASE_URL}/api/mfa/from-qr`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'x-csrf-token': token,
       },
       credentials: 'include',
       body: JSON.stringify(data),
@@ -69,8 +87,12 @@ export const api = {
   },
 
   async deleteMFA(id) {
+    const token = await getCsrfToken();
     const response = await fetch(`${API_BASE_URL}/api/mfa/${id}`, {
       method: 'DELETE',
+      headers: {
+        'x-csrf-token': token,
+      },
       credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to delete MFA');

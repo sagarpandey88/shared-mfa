@@ -4,6 +4,8 @@ const session = require('express-session');
 const passport = require('passport');
 const MicrosoftStrategy = require('passport-microsoft').Strategy;
 const cookieParser = require('cookie-parser');
+const rateLimit = require('express-rate-limit');
+const { doubleCsrf } = require('csrf-csrf');
 require('dotenv').config();
 
 const db = require('./db');
@@ -11,6 +13,22 @@ const mfaRoutes = require('./routes/mfa');
 const authRoutes = require('./routes/auth');
 
 const app = express();
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5, // Limit each IP to 5 auth requests per 15 minutes
+  message: 'Too many authentication attempts, please try again later.',
+});
+
+// Apply rate limiting to all routes
+app.use(limiter);
 
 // Middleware
 app.use(cors({
@@ -86,9 +104,31 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
+// CSRF Protection
+const {
+  generateToken, // Use this in routes to generate CSRF token
+  doubleCsrfProtection, // This is the default CSRF middleware
+} = doubleCsrf({
+  getSecret: () => process.env.SESSION_SECRET || 'your-secret-key',
+  cookieName: 'x-csrf-token',
+  cookieOptions: {
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+  },
+  size: 64,
+  ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
+});
+
+// CSRF token endpoint
+app.get('/csrf-token', (req, res) => {
+  const token = generateToken(req, res);
+  res.json({ token });
+});
+
 // Routes
-app.use('/auth', authRoutes);
-app.use('/api/mfa', mfaRoutes);
+app.use('/auth', authLimiter, authRoutes);
+app.use('/api/mfa', doubleCsrfProtection, mfaRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

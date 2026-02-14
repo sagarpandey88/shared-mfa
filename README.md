@@ -234,6 +234,9 @@ The application will be available at:
 - CORS is configured to only allow requests from the frontend
 - Microsoft OAuth provides secure authentication
 - No ORM to prevent SQL injection (parameterized queries used)
+- Rate limiting implemented to prevent abuse (100 requests per 15 minutes per IP)
+- CSRF protection on all state-changing endpoints
+- Separate rate limiting for authentication endpoints (5 attempts per 15 minutes)
 - This application is designed for internal development/testing environments
 
 ## Development
