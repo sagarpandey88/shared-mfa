@@ -68,7 +68,25 @@ The application will be available at:
 - Backend: http://localhost:3001
 - PostgreSQL: localhost:5432
 
-### Option 2: Manual Setup
+### Option 2: Quick Setup Script
+
+Use the automated setup script:
+
+```bash
+git clone https://github.com/sagarpandey88/shared-mfa.git
+cd shared-mfa
+./setup.sh
+```
+
+The script will:
+- Create the PostgreSQL database
+- Set up the database schema
+- Install backend and frontend dependencies
+- Create .env files from examples
+
+After running the script, update `backend/.env` with your configuration and start the servers.
+
+### Option 3: Manual Setup
 
 ### 1. Clone the Repository
 
