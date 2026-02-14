@@ -35,6 +35,41 @@ An Open Source Web-based shared MFA (Multi-Factor Authentication) token generato
 
 ## Setup Instructions
 
+You can set up the application in two ways:
+
+### Option 1: Docker Setup (Recommended)
+
+The easiest way to get started is using Docker Compose:
+
+1. Clone the repository:
+```bash
+git clone https://github.com/sagarpandey88/shared-mfa.git
+cd shared-mfa
+```
+
+2. Create a `.env` file in the root directory:
+```bash
+cp .env.example .env
+```
+
+3. Update the `.env` file with your Microsoft OAuth credentials:
+```env
+MICROSOFT_CLIENT_ID=your-microsoft-client-id
+MICROSOFT_CLIENT_SECRET=your-microsoft-client-secret
+```
+
+4. Start the application:
+```bash
+docker-compose up
+```
+
+The application will be available at:
+- Frontend: http://localhost:5173
+- Backend: http://localhost:3001
+- PostgreSQL: localhost:5432
+
+### Option 2: Manual Setup
+
 ### 1. Clone the Repository
 
 ```bash
@@ -193,11 +228,13 @@ The application will be available at:
 
 ## Security Considerations
 
-- All MFA secrets are stored encrypted in the database
+- MFA secrets are stored in plain text in the database (suitable for internal team use)
+- For production use, consider encrypting secrets at rest
 - Sessions use secure HTTP-only cookies
 - CORS is configured to only allow requests from the frontend
 - Microsoft OAuth provides secure authentication
 - No ORM to prevent SQL injection (parameterized queries used)
+- This application is designed for internal development/testing environments
 
 ## Development
 

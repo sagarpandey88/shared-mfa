@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: shared-mfa-db
+    environment:
+      POSTGRES_DB: shared_mfa
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: shared-mfa-backend
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: shared_mfa
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      PORT: 3001
+      NODE_ENV: development
+      SESSION_SECRET: development-secret-change-in-production
+      MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID}
+      MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET}
+      MICROSOFT_CALLBACK_URL: http://localhost:3001/auth/microsoft/callback
+      FRONTEND_URL: http://localhost:5173
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: shared-mfa-frontend
+    environment:
+      VITE_API_URL: http://localhost:3001
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
