@@ -1,0 +1,14 @@
+{
+  "name": "shared-mfa",
+  "version": "1.0.0",
+  "description": "An Open Source Web based shared MFA generator for teams",
+  "scripts": {
+    "install-all": "cd backend && npm install && cd ../frontend && npm install",
+    "backend": "cd backend && npm start",
+    "frontend": "cd frontend && npm run dev",
+    "setup-db": "psql -d shared_mfa -f backend/schema.sql"
+  },
+  "keywords": ["mfa", "totp", "authentication", "2fa"],
+  "author": "",
+  "license": "Apache-2.0"
+}
