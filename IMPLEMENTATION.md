@@ -8,7 +8,7 @@ Successfully implemented a complete web application for managing and sharing MFA
 ### Implementation Details
 
 #### Technology Stack
-- **Frontend**: React 18.3 + Vite 6.x
+- **Frontend**: React 18.3 + Vite + TypeScript
 - **Backend**: Node.js + Express 4.x
 - **Database**: PostgreSQL (raw SQL, no ORM)
 - **Authentication**: Microsoft OAuth 2.0 via Passport.js
