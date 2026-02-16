@@ -1,22 +1,29 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, ChangeEvent, FormEvent } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { api } from '../api';
+import { api, AddMFAData } from '../api';
 import './AddMFAModal.css';
 
-function AddMFAModal({ onClose, onAdd }) {
-  const [mode, setMode] = useState('manual'); // 'manual' or 'qr'
-  const [formData, setFormData] = useState({
+interface AddMFAModalProps {
+  onClose: () => void;
+  onAdd: () => void;
+}
+
+type Mode = 'manual' | 'qr';
+
+function AddMFAModal({ onClose, onAdd }: AddMFAModalProps) {
+  const [mode, setMode] = useState<Mode>('manual');
+  const [formData, setFormData] = useState<AddMFAData>({
     name: '',
     secret: '',
     issuer: '',
   });
-  const [qrData, setQrData] = useState('');
-  const [customName, setCustomName] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [scanning, setScanning] = useState(false);
-  const scannerRef = useRef(null);
-  const qrScannerRef = useRef(null);
+  const [qrData, setQrData] = useState<string>('');
+  const [customName, setCustomName] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [scanning, setScanning] = useState<boolean>(false);
+  const scannerRef = useRef<HTMLDivElement>(null);
+  const qrScannerRef = useRef<Html5Qrcode | null>(null);
 
   useEffect(() => {
     return () => {
@@ -26,7 +33,7 @@ function AddMFAModal({ onClose, onAdd }) {
     };
   }, []);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -34,7 +41,7 @@ function AddMFAModal({ onClose, onAdd }) {
     setError('');
   };
 
-  const handleManualSubmit = async (e) => {
+  const handleManualSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (!formData.name || !formData.secret) {
       setError('Name and secret are required');
@@ -47,13 +54,13 @@ function AddMFAModal({ onClose, onAdd }) {
       await api.addMFA(formData);
       onAdd();
     } catch (error) {
-      setError(error.message);
+      setError((error as Error).message);
     } finally {
       setLoading(false);
     }
   };
 
-  const startScanner = async () => {
+  const startScanner = async (): Promise<void> => {
     try {
       setScanning(true);
       setError('');
@@ -67,12 +74,12 @@ function AddMFAModal({ onClose, onAdd }) {
           fps: 10,
           qrbox: { width: 250, height: 250 }
         },
-        async (decodedText) => {
+        async (decodedText: string) => {
           setQrData(decodedText);
           await html5QrCode.stop();
           setScanning(false);
         },
-        (errorMessage) => {
+        () => {
           // Ignore continuous scanning errors
         }
       );
@@ -83,7 +90,7 @@ function AddMFAModal({ onClose, onAdd }) {
     }
   };
 
-  const stopScanner = async () => {
+  const stopScanner = async (): Promise<void> => {
     if (qrScannerRef.current) {
       try {
         await qrScannerRef.current.stop();
@@ -94,7 +101,7 @@ function AddMFAModal({ onClose, onAdd }) {
     setScanning(false);
   };
 
-  const handleQRSubmit = async (e) => {
+  const handleQRSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (!qrData) {
       setError('Please scan a QR code first');
@@ -107,7 +114,7 @@ function AddMFAModal({ onClose, onAdd }) {
       await api.addMFAFromQR({ qrData, customName });
       onAdd();
     } catch (error) {
-      setError(error.message);
+      setError((error as Error).message);
     } finally {
       setLoading(false);
     }

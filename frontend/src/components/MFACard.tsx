@@ -1,15 +1,34 @@
-import { useState, useEffect } from 'react';
-import { api } from '../api';
+import { useState, useEffect, useCallback } from 'react';
+import { api, MFAAccount } from '../api';
 import './MFACard.css';
 
-function MFACard({ account, onDelete }) {
-  const [token, setToken] = useState('------');
-  const [remainingTime, setRemainingTime] = useState(30);
-  const [loading, setLoading] = useState(false);
-  const [showToken, setShowToken] = useState(false);
+interface MFACardProps {
+  account: MFAAccount;
+  onDelete: (id: number) => void;
+}
+
+function MFACard({ account, onDelete }: MFACardProps) {
+  const [token, setToken] = useState<string>('------');
+  const [remainingTime, setRemainingTime] = useState<number>(30);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [showToken, setShowToken] = useState<boolean>(false);
+
+  const fetchToken = useCallback(async (): Promise<void> => {
+    try {
+      setLoading(true);
+      const data = await api.getToken(account.id);
+      setToken(data.token);
+      setRemainingTime(data.remainingTime);
+    } catch (error) {
+      console.error('Failed to fetch token:', error);
+      setToken('Error');
+    } finally {
+      setLoading(false);
+    }
+  }, [account.id]);
 
   useEffect(() => {
-    let interval;
+    let interval: ReturnType<typeof setInterval> | undefined;
     if (showToken) {
       fetchToken();
       interval = setInterval(fetchToken, 30000); // Refresh every 30 seconds
@@ -17,10 +36,10 @@ function MFACard({ account, onDelete }) {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [showToken, account.id]);
+  }, [showToken, fetchToken]);
 
   useEffect(() => {
-    let countdown;
+    let countdown: ReturnType<typeof setInterval> | undefined;
     if (showToken && remainingTime > 0) {
       countdown = setInterval(() => {
         setRemainingTime((prev) => {
@@ -36,21 +55,7 @@ function MFACard({ account, onDelete }) {
     };
   }, [showToken, remainingTime]);
 
-  const fetchToken = async () => {
-    try {
-      setLoading(true);
-      const data = await api.getToken(account.id);
-      setToken(data.token);
-      setRemainingTime(data.remainingTime);
-    } catch (error) {
-      console.error('Failed to fetch token:', error);
-      setToken('Error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const toggleToken = () => {
+  const toggleToken = (): void => {
     setShowToken(!showToken);
     if (!showToken) {
       fetchToken();
@@ -60,7 +65,7 @@ function MFACard({ account, onDelete }) {
     }
   };
 
-  const copyToken = () => {
+  const copyToken = (): void => {
     if (token && token !== '------' && token !== 'Error') {
       navigator.clipboard.writeText(token);
       alert('Token copied to clipboard!');

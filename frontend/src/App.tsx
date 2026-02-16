@@ -2,12 +2,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useState, useEffect } from 'react';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import { api } from './api';
+import { api, User } from './api';
 import './App.css';
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     checkAuth();
@@ -17,7 +17,7 @@ function App() {
     try {
       const userData = await api.getUser();
       setUser(userData);
-    } catch (error) {
+    } catch {
       setUser(null);
     } finally {
       setLoading(false);

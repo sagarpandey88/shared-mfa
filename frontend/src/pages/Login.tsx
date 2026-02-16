@@ -2,7 +2,7 @@ import { AUTH_URL } from '../api';
 import './Login.css';
 
 function Login() {
-  const handleLogin = () => {
+  const handleLogin = (): void => {
     window.location.href = AUTH_URL;
   };
 

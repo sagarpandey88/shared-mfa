@@ -1,19 +1,24 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api';
+import { api, User, MFAAccount } from '../api';
 import MFACard from '../components/MFACard';
 import AddMFAModal from '../components/AddMFAModal';
 import './Dashboard.css';
 
-function Dashboard({ user, onLogout }) {
-  const [mfaAccounts, setMfaAccounts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
+interface DashboardProps {
+  user: User;
+  onLogout: () => void;
+}
+
+function Dashboard({ user, onLogout }: DashboardProps) {
+  const [mfaAccounts, setMfaAccounts] = useState<MFAAccount[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [showAddModal, setShowAddModal] = useState<boolean>(false);
 
   useEffect(() => {
     loadMFAAccounts();
   }, []);
 
-  const loadMFAAccounts = async () => {
+  const loadMFAAccounts = async (): Promise<void> => {
     try {
       const accounts = await api.getMFAAccounts();
       setMfaAccounts(accounts);
@@ -24,7 +29,7 @@ function Dashboard({ user, onLogout }) {
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = async (): Promise<void> => {
     try {
       await api.logout();
       onLogout();
@@ -33,12 +38,12 @@ function Dashboard({ user, onLogout }) {
     }
   };
 
-  const handleAddMFA = async (mfaData) => {
+  const handleAddMFA = async (): Promise<void> => {
     await loadMFAAccounts();
     setShowAddModal(false);
   };
 
-  const handleDeleteMFA = async (id) => {
+  const handleDeleteMFA = async (id: number): Promise<void> => {
     if (window.confirm('Are you sure you want to delete this MFA account?')) {
       try {
         await api.deleteMFA(id);

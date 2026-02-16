@@ -16,6 +16,7 @@ An Open Source Web-based shared MFA (Multi-Factor Authentication) token generato
 
 ### Frontend
 - React with Vite
+- TypeScript for type safety
 - React Router for navigation
 - HTML5-QRCode for QR code scanning
 - Responsive CSS

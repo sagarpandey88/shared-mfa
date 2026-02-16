@@ -1,14 +1,48 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-// CSRF token cache
-let csrfToken = null;
+// Type definitions
+export interface User {
+  id: number;
+  email: string;
+  name: string;
+}
 
-async function getCsrfToken() {
+export interface MFAAccount {
+  id: number;
+  name: string;
+  issuer?: string;
+  created_at: string;
+}
+
+export interface TokenResponse {
+  token: string;
+  remainingTime: number;
+}
+
+export interface AddMFAData {
+  name: string;
+  secret: string;
+  issuer?: string;
+}
+
+export interface AddMFAFromQRData {
+  qrData: string;
+  customName?: string;
+}
+
+interface CSRFTokenResponse {
+  token: string;
+}
+
+// CSRF token cache
+let csrfToken: string | null = null;
+
+async function getCsrfToken(): Promise<string> {
   if (!csrfToken) {
     const response = await fetch(`${API_BASE_URL}/csrf-token`, {
       credentials: 'include',
     });
-    const data = await response.json();
+    const data: CSRFTokenResponse = await response.json();
     csrfToken = data.token;
   }
   return csrfToken;
@@ -16,7 +50,7 @@ async function getCsrfToken() {
 
 export const api = {
   // Auth endpoints
-  async getUser() {
+  async getUser(): Promise<User> {
     const response = await fetch(`${API_BASE_URL}/auth/user`, {
       credentials: 'include',
     });
@@ -24,7 +58,7 @@ export const api = {
     return response.json();
   },
 
-  async logout() {
+  async logout(): Promise<{ message: string }> {
     const response = await fetch(`${API_BASE_URL}/auth/logout`, {
       method: 'POST',
       credentials: 'include',
@@ -34,7 +68,7 @@ export const api = {
   },
 
   // MFA endpoints
-  async getMFAAccounts() {
+  async getMFAAccounts(): Promise<MFAAccount[]> {
     const response = await fetch(`${API_BASE_URL}/api/mfa`, {
       credentials: 'include',
     });
@@ -42,7 +76,7 @@ export const api = {
     return response.json();
   },
 
-  async getToken(id) {
+  async getToken(id: number): Promise<TokenResponse> {
     const response = await fetch(`${API_BASE_URL}/api/mfa/${id}/token`, {
       credentials: 'include',
     });
@@ -50,7 +84,7 @@ export const api = {
     return response.json();
   },
 
-  async addMFA(data) {
+  async addMFA(data: AddMFAData): Promise<MFAAccount> {
     const token = await getCsrfToken();
     const response = await fetch(`${API_BASE_URL}/api/mfa`, {
       method: 'POST',
@@ -62,13 +96,13 @@ export const api = {
       body: JSON.stringify(data),
     });
     if (!response.ok) {
-      const error = await response.json();
+      const error: { error?: string } = await response.json();
       throw new Error(error.error || 'Failed to add MFA');
     }
     return response.json();
   },
 
-  async addMFAFromQR(data) {
+  async addMFAFromQR(data: AddMFAFromQRData): Promise<MFAAccount> {
     const token = await getCsrfToken();
     const response = await fetch(`${API_BASE_URL}/api/mfa/from-qr`, {
       method: 'POST',
@@ -80,13 +114,13 @@ export const api = {
       body: JSON.stringify(data),
     });
     if (!response.ok) {
-      const error = await response.json();
+      const error: { error?: string } = await response.json();
       throw new Error(error.error || 'Failed to add MFA from QR');
     }
     return response.json();
   },
 
-  async deleteMFA(id) {
+  async deleteMFA(id: number): Promise<{ message: string }> {
     const token = await getCsrfToken();
     const response = await fetch(`${API_BASE_URL}/api/mfa/${id}`, {
       method: 'DELETE',
