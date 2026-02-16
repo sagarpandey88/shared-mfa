@@ -1,0 +1,133 @@
+.mfa-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.mfa-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mfa-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.mfa-name {
+  font-size: 1.2rem;
+  color: #333;
+  margin: 0;
+  word-break: break-word;
+}
+
+.mfa-issuer {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0 0 1rem 0;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.2rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.delete-button:hover {
+  opacity: 1;
+}
+
+.mfa-token-section {
+  min-height: 80px;
+  margin-bottom: 1rem;
+}
+
+.token-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.token-value {
+  font-size: 2rem;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  color: #667eea;
+  letter-spacing: 0.1em;
+}
+
+.copy-button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.2rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.copy-button:hover {
+  opacity: 1;
+}
+
+.token-timer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.timer-bar {
+  flex: 1;
+  height: 4px;
+  background: #e0e0e0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.timer-fill {
+  height: 100%;
+  background: #667eea;
+  transition: width 1s linear;
+}
+
+.timer-text {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+  min-width: 30px;
+}
+
+.token-hidden {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  color: #999;
+  font-style: italic;
+}
+
+.show-token-button {
+  width: 100%;
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 0.7rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.show-token-button:hover {
+  background: #5568d3;
+}
